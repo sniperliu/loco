@@ -175,7 +175,7 @@
     ($= ($nth [:a :b :c :d :e] :x 1) :x)]
    [{:a 5 :b 5 :c 3 :d 5 :e 5 :x 3}]))
 
-(deftest deprecated-regex-test
+#_(deftest deprecated-regex-test
   (let [regex "(1|2)3*(4|5)"]
     (-> (solutions
           [($in :a [1])
@@ -190,7 +190,7 @@
       (= 1)
       is)))
 
-(deftest automaton-test
+#_(deftest automaton-test
   (doseq [[description automaton]
           [["string->automaton"
             (a/string->automaton "12*3+")]
