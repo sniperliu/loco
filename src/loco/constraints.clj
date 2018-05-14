@@ -227,7 +227,7 @@ to equal (x - y - z - ...) or (-x) if there's only one argument."
 
 (defmethod ->choco* [:min :=]
   [model {:keys [args eq-arg]}]
-  (let [args (map ->choco-int-var model args)
+  (let [args (map #(->choco-int-var model %) args)
         eq-arg (->choco-int-var model eq-arg)]
     (if (= (count args) 2)
       (.min model eq-arg (first args) (second args))
@@ -235,7 +235,7 @@ to equal (x - y - z - ...) or (-x) if there's only one argument."
 
 (defmethod ->choco* :min
   [model {:keys [args]}]
-  (let [args (map ->choco-int-var model args)
+  (let [args (map #(->choco-int-var model %) args)
         mins (map domain-min args)
         maxes (map domain-max args)
         final-min (apply min mins)
@@ -257,7 +257,7 @@ to equal (x - y - z - ...) or (-x) if there's only one argument."
 
 (defmethod ->choco* [:max :=]
   [model {:keys [args eq-arg]}]
-  (let [args (map ->choco-int-var model args)
+  (let [args (map #(->choco-int-var model %) args)
         eq-arg (->choco-int-var model eq-arg)]
     (if (= (count args) 2)
       (.max model eq-arg (first args) (second args))
@@ -265,7 +265,7 @@ to equal (x - y - z - ...) or (-x) if there's only one argument."
 
 (defmethod ->choco* :max
   [model {:keys [args]}]
-  (let [args (map ->choco-int-var model args)
+  (let [args (map #(->choco-int-var model %) args)
         mins (map domain-min args)
         maxes (map domain-max args)
         final-min (apply max mins)
@@ -330,14 +330,14 @@ to equal (x - y - z - ...) or (-x) if there's only one argument."
 (defmethod ->choco* [:scalar :=]
   [model {:keys [variables coefficients eq-arg]}]
   (.scalar model
-           (into-array IntVar (map ->choco-int-var model variables))
+           (into-array IntVar (map #(->choco-int-var model %) variables))
            (int-array coefficients)
            "="
            (->choco-int-var model eq-arg)))
 
 (defmethod ->choco* :scalar
   [model {:keys [variables coefficients]}]
-  (let [variables (map ->choco-int-var model variables)
+  (let [variables (map #(->choco-int-var model %) variables)
         minmaxes (for [[v c] (map vector variables coefficients)
                        :let [dmin (* (domain-min v) c)
                              dmax (* (domain-max v) c)]]
@@ -370,14 +370,13 @@ to equal (x - y - z - ...) or (-x) if there's only one argument."
         :arg1 X#
         :arg2 Y#})
      ([X# Y# & more#]
-       (apply $and (map (partial apply ~fnname) (partition 2 1 (list* X# Y# more#)))))))
+      (apply $and (map (partial apply ~fnname) (partition 2 1 (list* X# Y# more#)))))))
 
 (defmethod ->choco* :arithm-eq
   [model data]
   (let [op (:eq data)
         X (->choco-int-var model (:arg1 data))
         Y (->choco-int-var model (:arg2 data))]
-    ;(println X Y)
     (constrain! model (.arithm model X (name op) Y))))
 
 (defn-equality-constraint $<
